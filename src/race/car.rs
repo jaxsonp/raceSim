@@ -1,31 +1,48 @@
 
+use graphics::Transformed;
 use opengl_graphics::GlGraphics;
-use piston::input::{RenderArgs, RenderEvent, UpdateArgs, UpdateEvent};
+use piston::input::{RenderArgs, UpdateArgs};
 
-const CAR_COLOR: [f32; 4] = [0.95, 0.1, 0.2, 1.0]; // red
-
+use crate::{Pos, RenderContext};
 
 pub struct Car {
-    x_pos: f32,
-    y_pos: f32,
-    rotation: f32,
+    pub id: u32,
+    t: u64,
+    pos: Pos,
+    orientation: f32,
 }
 
 impl Car {
-    const CAR_WIDTH: f32 = 10.0;
-    const CAR_LENGTH: f32 = Car::CAR_WIDTH * 2.0;
+    const LENGTH: f32 = 30.0;
+    const WIDTH: f32 = Car::LENGTH / 2.0;
+    const COLOR: [f32; 4] = [0.95, 0.1, 0.2, 1.0]; // red
 
-    fn new () {
-
+    pub fn new (id: u32, start_pos: Pos, start_orientation: f32) -> Self {
+        Car {
+            id,
+            t: 0,
+            pos: start_pos,
+            orientation: start_orientation
+        }
     }
 
-    fn render(&self, gl: &mut GlGraphics, render_args: &RenderArgs) {
-        let body_rect = graphics::rectangle::centered([self.x_pos as f64, self.y_pos as f64, Car::CAR_WIDTH as f64, Car::CAR_LENGTH as f64]);
-
+    pub fn render(&self, gl: &mut GlGraphics, render_args: &RenderArgs, render_context: &RenderContext) {
         gl.draw(render_args.viewport(), |c,gl| {
-            let transform = c.transform;
+            let body_rect: graphics::types::Rectangle = [
+                (-Car::WIDTH / 2.0) as f64,
+                (-Car::LENGTH / 2.0) as f64,
+                Car::WIDTH as f64,
+                Car::LENGTH as f64
+            ];
+            let transform = render_context.apply_transformation(c.transform)
+                .trans(self.pos.x as f64, self.pos.y as f64)
+                .rot_rad(self.orientation as f64);
 
-            graphics::rectangle(CAR_COLOR, body_rect, transform, gl)
+            graphics::rectangle(Car::COLOR, body_rect, transform, gl)
         });
+    }
+
+    pub fn update(&mut self, gl: &mut GlGraphics, update_args: &UpdateArgs) {
+        self.t += 1;
     }
 }

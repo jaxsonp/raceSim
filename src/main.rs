@@ -3,61 +3,46 @@ extern crate graphics;
 extern crate opengl_graphics;
 extern crate piston;
 
+mod race;
+
 use glutin_window::GlutinWindow as Window;
 use opengl_graphics::{GlGraphics, OpenGL};
+use piston::{MouseCursorEvent, MouseRelativeEvent, FocusEvent, CloseEvent, ButtonEvent, MouseScrollEvent};
 use piston::event_loop::{EventSettings, Events};
-use piston::input::{RenderArgs, RenderEvent, UpdateArgs, UpdateEvent};
+use piston::input::{RenderEvent, UpdateEvent, Button, ButtonState, MouseButton};
 use piston::window::WindowSettings;
 
-mod race;
-use race::Race;
-use racetrack_simulator::Pos;
+use racetrack_simulator::{Pos, Dim, Simulation, RenderContext};
 
-const WIDTH: f32 = 1000.0;
-const HEIGHT: f32 = 800.0;
+const N_CARS: u32 = 100;
+
+const WIDTH: f32 = 600.0;
+const HEIGHT: f32 = 600.0;
 const MAX_FPS: u32 = 60;
-
-const GRASS_COLOR: [f32; 4] = [0.5, 0.72, 0.56, 1.0];
-const GRAY: [f32; 4] = [0.44, 0.4, 0.46, 1.0];
-
-
-pub struct Simulation {
-    gl: GlGraphics, // OpenGL drawing backend.
-    race: Race,
-}
-
-impl Simulation {
-    fn render(&mut self, render_args: &RenderArgs) {
-
-        self.gl.draw(render_args.viewport(), |c, gl| {
-            // draw background
-            graphics::clear(GRASS_COLOR, gl);
-        });
-
-        self.race.render(&mut self.gl, render_args);
-    }
-
-    fn update(&mut self, args: &UpdateArgs) {
-
-    }
-}
+const SCROLL_SPEED: f64 = 0.07;
 
 fn main() {
-    // Change this to OpenGL::V2_1 if not working.
-    let opengl = OpenGL::V3_2;
+    println!("Starting");
 
-    // Create a Glutin window.
-    let mut window: Window = WindowSettings::new("Racetrack Simulator", [WIDTH as f64, HEIGHT as f64])
+    // creating window
+    let opengl = OpenGL::V3_2;
+    let size = Dim::new(WIDTH as f64, HEIGHT as f64);
+    let mut window: Window = WindowSettings::new("Racetrack Simulator", [size.w, size.h])
         .graphics_api(opengl)
         .exit_on_esc(true)
+        .resizable(true)
         .build()
-        .unwrap();
+        .expect("Failed to create window");
+    let mut mouse_pos = Pos::zero();
+    let mut window_focused = true;
+    let mut left_mouse_pressed = false;
 
-    // Create a new simulation and run it.
-    let mut sim = Simulation {
-        gl: GlGraphics::new(opengl),
-        race: Race::new(100, WIDTH, HEIGHT),
-    };
+    // initializing a render context
+    let mut render_context = RenderContext::new();
+
+    // creating the simulation
+    let gl = GlGraphics::new(opengl);
+    let mut sim = Simulation::new(gl, N_CARS, &size);
 
     let mut event_settings = EventSettings::new();
     event_settings.max_fps = MAX_FPS as u64;
@@ -65,11 +50,53 @@ fn main() {
     // event loop
     while let Some(e) = events.next(&mut window) {
         if let Some(args) = e.render_args() {
-            sim.render(&args);
-        }
+            // render event
+            sim.render(&args, &render_context);
 
-        if let Some(args) = e.update_args() {
+        } else if let Some(args) = e.update_args() {
+            // update event
             sim.update(&args);
+
+        } else if let Some(args) = e.focus_args() {
+            // focus event
+            window_focused = args;
+
+        } else if let Some(args) = e.close_args() {
+            // close event
+            println!("Closing");
+
+        } else if let Some(args) = e.mouse_relative_args() {
+            // mouse moved event (rel)
+            if left_mouse_pressed && window_focused {
+                // panning with user input
+                render_context.pos.x += args[0];
+                render_context.pos.y += args[1];
+            }
+
+        } else if let Some(args) = e.mouse_cursor_args() {
+            // mouse moved event (abs)
+            mouse_pos.update(args[0], args[1]);
+
+        } else if let Some(args) = e.mouse_scroll_args() {
+            // mouse scroll event
+            if args[1] != 0.0 {
+                // zooming with user input
+                let scroll = if args[1] == 1.0 {
+                    1.0 / (1.0 - SCROLL_SPEED)
+                } else {
+                    1.0 - SCROLL_SPEED
+                };
+                render_context.pos.x = render_context.pos.x * scroll + mouse_pos.x * (1.0 - scroll);
+                render_context.pos.y = render_context.pos.y * scroll + mouse_pos.y * (1.0 - scroll);
+                render_context.scale *= scroll;
+            }
+
+        } else if let Some(args) = e.button_args() {
+            // button event
+            if args.button == Button::Mouse(MouseButton::Left) {
+                // left mouse button event
+                left_mouse_pressed = args.state == ButtonState::Press;
+            }
         }
     }
 }
