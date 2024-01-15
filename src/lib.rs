@@ -5,12 +5,19 @@ use piston::{RenderArgs, UpdateArgs};
 use std::fmt;
 use opengl_graphics::GlGraphics;
 
-use race::Race;
+use race::{Race, Track, generate_track};
+
+pub const GREEN: &'static [f32; 4] = &[0.5, 0.72, 0.56, 1.0];
+pub const RED: &'static [f32; 4] = &[0.95, 0.1, 0.2, 1.0];
+pub const GRAY: &'static [f32; 4] = &[0.44, 0.4, 0.46, 1.0];
+pub const BLACK: &'static [f32; 4] = &[0.0, 0.02, 0.02, 1.0];
+
 
 pub struct Simulation {
     gl: GlGraphics, // OpenGL drawing backend.
     race: Race,
     size: Dim,
+    track: Track,
 }
 
 impl Simulation {
@@ -18,18 +25,23 @@ impl Simulation {
         println!("Initializing simulation");
         let size = size.clone();
 
-        use race::generate_track;
         let track = generate_track(&size);
 
         let race = Race::new(n_cars, &size, track.start_pos, track.start_orientation);
-        Simulation { gl, race, size, }
+        Simulation { gl, race, size, track, }
+    }
+
+    // TEMP FUNCTION, TODO delete
+    pub fn regenerate_track(&mut self) -> () {
+        self.track = generate_track(&self.size);
     }
 
     pub fn render(&mut self, render_args: &RenderArgs, render_context: &RenderContext) {
-        // drawing background
-        /*self.gl.draw(render_args.viewport(), |c, gl| {
-            graphics::clear(WHITE, gl);
-        });*/
+        // drawing grass
+        self.gl.draw(render_args.viewport(), |c, gl| {
+            graphics::clear(*GREEN, gl);
+        });
+        self.track.render(&mut self.gl, render_args, render_context);
         self.race.render(&mut self.gl, render_args, render_context);
     }
 
@@ -43,7 +55,7 @@ impl Simulation {
 */
 pub struct RenderContext {
     pub pos: Pos,
-    pub scale: f64,
+    pub scale: f32,
 }
 
 impl RenderContext {
@@ -55,7 +67,7 @@ impl RenderContext {
     }
 
     pub fn apply_transformation (&self, transform: [[f64; 3]; 2]) -> [[f64; 3]; 2] {
-        transform.trans(self.pos.x, self.pos.y).scale(self.scale, self.scale)
+        transform.trans(self.pos.x as f64, self.pos.y as f64).scale(self.scale as f64, self.scale as f64)
     }
 }
 
@@ -64,22 +76,46 @@ impl RenderContext {
  */
 #[derive(Copy, Clone)]
 pub struct Pos {
-    pub x: f64,
-    pub y: f64,
+    pub x: f32,
+    pub y: f32,
 }
 
 impl Pos {
-    pub fn new(x: f64, y: f64) -> Self {
+    pub fn new(x: f32, y: f32) -> Self {
         Self { x, y }
     }
 
-    pub fn update(&mut self, x: f64, y: f64) -> () {
+    pub fn update(&mut self, x: f32, y: f32) -> () {
         self.x = x;
         self.y = y;
     }
 
     pub fn zero() -> Self {
         Self { x: 0.0, y: 0.0 }
+    }
+
+    pub fn mul(&self, a: f32) -> Self {
+        Self { x: self.x * a, y: self.y * a }
+    }
+
+    pub fn add(&self, a: Pos) -> Self {
+        Self { x: self.x + a.x, y: self.y + a.y }
+    }
+
+    pub fn sub(&self, a: Pos) -> Self {
+        Self { x: self.x - a.x, y: self.y - a.y }
+    }
+
+    pub fn dot(&self, a: Pos) -> f32 {
+        self.x * a.x + self.y * a.y
+    }
+
+    pub fn len(&self) -> f32 {
+        (self.x.powf(2.0) + self.y.powf(2.0)).sqrt().abs()
+    }
+
+    pub fn normalize(&self) -> Self {
+        Self { x: self.x / self.len(), y: self.y / self.len() }
     }
 }
 
@@ -95,16 +131,16 @@ impl fmt::Display for Pos {
  */
 #[derive(Copy, Clone)]
 pub struct Dim {
-    pub w: f64,
-    pub h: f64,
+    pub w: f32,
+    pub h: f32,
 }
 
 impl Dim {
-    pub fn new(w: f64, h: f64) -> Self {
+    pub fn new(w: f32, h: f32) -> Self {
         Self { w, h }
     }
 
-    pub fn update(&mut self, w: f64, h: f64) -> () {
+    pub fn update(&mut self, w: f32, h: f32) -> () {
         self.w = w;
         self.h = h;
     }

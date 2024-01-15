@@ -16,18 +16,23 @@ use racetrack_simulator::{Pos, Dim, Simulation, RenderContext};
 
 const N_CARS: u32 = 100;
 
-const WIDTH: f32 = 600.0;
-const HEIGHT: f32 = 600.0;
+const WIDTH: f32 = 800.0;
+const HEIGHT: f32 = 800.0;
 const MAX_FPS: u32 = 60;
-const SCROLL_SPEED: f64 = 0.07;
+const SCROLL_SPEED: f32 = 0.07;
+
+pub use racetrack_simulator::GRAY;
+pub use racetrack_simulator::GREEN;
+pub use racetrack_simulator::RED;
+pub use racetrack_simulator::BLACK;
 
 fn main() {
     println!("Starting");
 
     // creating window
     let opengl = OpenGL::V3_2;
-    let size = Dim::new(WIDTH as f64, HEIGHT as f64);
-    let mut window: Window = WindowSettings::new("Racetrack Simulator", [size.w, size.h])
+    let size = Dim::new(WIDTH, HEIGHT);
+    let mut window: Window = WindowSettings::new("Racetrack Simulator", [size.w as f64, size.h as f64])
         .graphics_api(opengl)
         .exit_on_esc(true)
         .resizable(true)
@@ -61,7 +66,7 @@ fn main() {
             // focus event
             window_focused = args;
 
-        } else if let Some(args) = e.close_args() {
+        } else if let Some(_) = e.close_args() {
             // close event
             println!("Closing");
 
@@ -69,13 +74,13 @@ fn main() {
             // mouse moved event (rel)
             if left_mouse_pressed && window_focused {
                 // panning with user input
-                render_context.pos.x += args[0];
-                render_context.pos.y += args[1];
+                render_context.pos.x += args[0] as f32;
+                render_context.pos.y += args[1] as f32;
             }
 
         } else if let Some(args) = e.mouse_cursor_args() {
             // mouse moved event (abs)
-            mouse_pos.update(args[0], args[1]);
+            mouse_pos.update(args[0] as f32, args[1] as f32);
 
         } else if let Some(args) = e.mouse_scroll_args() {
             // mouse scroll event
@@ -96,6 +101,9 @@ fn main() {
             if args.button == Button::Mouse(MouseButton::Left) {
                 // left mouse button event
                 left_mouse_pressed = args.state == ButtonState::Press;
+                if left_mouse_pressed {
+                    sim.regenerate_track();
+                }
             }
         }
     }

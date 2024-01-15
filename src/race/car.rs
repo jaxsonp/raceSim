@@ -3,7 +3,7 @@ use graphics::Transformed;
 use opengl_graphics::GlGraphics;
 use piston::input::{RenderArgs, UpdateArgs};
 
-use crate::{Pos, RenderContext};
+use crate::{Pos, RenderContext, RED};
 
 pub struct Car {
     pub id: u32,
@@ -15,7 +15,6 @@ pub struct Car {
 impl Car {
     const LENGTH: f32 = 30.0;
     const WIDTH: f32 = Car::LENGTH / 2.0;
-    const COLOR: [f32; 4] = [0.95, 0.1, 0.2, 1.0]; // red
 
     pub fn new (id: u32, start_pos: Pos, start_orientation: f32) -> Self {
         Car {
@@ -38,7 +37,7 @@ impl Car {
                 .trans(self.pos.x as f64, self.pos.y as f64)
                 .rot_rad(self.orientation as f64);
 
-            graphics::rectangle(Car::COLOR, body_rect, transform, gl)
+            graphics::rectangle(*RED, body_rect, transform, gl)
         });
     }
 
