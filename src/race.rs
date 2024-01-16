@@ -4,7 +4,7 @@ mod track;
 use opengl_graphics::GlGraphics;
 use piston::input::{RenderArgs, UpdateArgs};
 
-use crate::{Pos, Dim, RenderContext, GREEN};
+use crate::{Pos, Dim, RenderContext};
 use car::Car;
 pub use track::Track;
 

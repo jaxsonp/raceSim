@@ -1,4 +1,5 @@
 mod race;
+mod colors;
 
 use graphics::Transformed;
 use piston::{RenderArgs, UpdateArgs};
@@ -6,12 +7,7 @@ use std::fmt;
 use opengl_graphics::GlGraphics;
 
 use race::{Race, Track, generate_track};
-
-pub const GREEN: &'static [f32; 4] = &[0.5, 0.72, 0.56, 1.0];
-pub const RED: &'static [f32; 4] = &[0.95, 0.1, 0.2, 1.0];
-pub const GRAY: &'static [f32; 4] = &[0.44, 0.4, 0.46, 1.0];
-pub const BLACK: &'static [f32; 4] = &[0.0, 0.02, 0.02, 1.0];
-
+use colors::*;
 
 pub struct Simulation {
     gl: GlGraphics, // OpenGL drawing backend.
@@ -39,7 +35,7 @@ impl Simulation {
     pub fn render(&mut self, render_args: &RenderArgs, render_context: &RenderContext) {
         // drawing grass
         self.gl.draw(render_args.viewport(), |c, gl| {
-            graphics::clear(*GREEN, gl);
+            graphics::clear(GREEN, gl);
         });
         self.track.render(&mut self.gl, render_args, render_context);
         self.race.render(&mut self.gl, render_args, render_context);

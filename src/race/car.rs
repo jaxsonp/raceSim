@@ -1,9 +1,8 @@
-
 use graphics::Transformed;
 use opengl_graphics::GlGraphics;
 use piston::input::{RenderArgs, UpdateArgs};
 
-use crate::{Pos, RenderContext, RED};
+use crate::{colors::*, Pos, RenderContext};
 
 pub struct Car {
     pub id: u32,
@@ -37,7 +36,7 @@ impl Car {
                 .trans(self.pos.x as f64, self.pos.y as f64)
                 .rot_rad(self.orientation as f64);
 
-            graphics::rectangle(*RED, body_rect, transform, gl)
+            graphics::rectangle(RED, body_rect, transform, gl)
         });
     }
 

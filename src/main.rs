@@ -4,6 +4,7 @@ extern crate opengl_graphics;
 extern crate piston;
 
 mod race;
+pub mod colors;
 
 use glutin_window::GlutinWindow as Window;
 use opengl_graphics::{GlGraphics, OpenGL};
@@ -21,10 +22,7 @@ const HEIGHT: f32 = 800.0;
 const MAX_FPS: u32 = 60;
 const SCROLL_SPEED: f32 = 0.07;
 
-pub use racetrack_simulator::GRAY;
-pub use racetrack_simulator::GREEN;
-pub use racetrack_simulator::RED;
-pub use racetrack_simulator::BLACK;
+use colors::*;
 
 fn main() {
     println!("Starting");
