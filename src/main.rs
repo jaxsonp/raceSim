@@ -99,9 +99,11 @@ fn main() {
             if args.button == Button::Mouse(MouseButton::Left) {
                 // left mouse button event
                 left_mouse_pressed = args.state == ButtonState::Press;
-                if left_mouse_pressed {
+
+                // DEBUG: regenerate track on click
+                /*if left_mouse_pressed {
                     sim.regenerate_track();
-                }
+                }*/
             }
         }
     }
