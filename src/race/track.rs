@@ -1,10 +1,11 @@
 extern crate image;
 
-use std::{fs, path};
+use std::{fs, path::Path};
 use std::f32::consts::PI;
 use image::{ImageBuffer, Rgb, save_buffer, Luma};
 use nalgebra::{Matrix4, Vector4, SVD, Const};
-use opengl_graphics::GlGraphics;
+use opengl_graphics::{GlGraphics, Texture, TextureSettings};
+use graphics::{rectangle::Rectangle, Image};
 use piston::input::RenderArgs;
 use rand::{thread_rng, Rng}; // provides rng
 
@@ -13,19 +14,23 @@ use crate::{colors::*, Pos, Dim, RenderContext};
 pub struct Track {
     points: Vec<BezierPoint>,
     pub map: ImageBuffer<Luma<u8>, Vec<u8>>,
-    pub img: ImageBuffer<Rgb<u8>, Vec<u8>>,
+    pub img: Texture,
     pub start_pos: Pos,
     pub start_orientation: f32,
     render_matrix_decomp: SVD<f32, Const<4>, Const<4>>,
 }
 
 impl Track {
-    /*pub fn new(curve: Pos, start_pos: Pos, start_orientation: f32) -> Self {
-        Self { vec![1; 0], start_pos, start_orientation }
-    }*/
 
     pub fn render(&self, gl: &mut GlGraphics, render_args: &RenderArgs, render_context: &RenderContext) {
         // drawing road
+        /*let image  = Image::new().rect(Rectangle(0.0, 0.0, 200.0));
+        gl.draw(render_args.viewport(), |c, gl| {
+            //Clear the screen
+            graphics::clear([0.0, 0.0, 0.0, 1.0], gl);
+            //Draw the image with the texture
+            image.draw(&self.img, default_draw_state(), c.transform, gl);
+        });*/
         for i in 0.. self.points.len() {
             // catmull-rom spline drawing
             let p1 = &self.points[i];
@@ -251,11 +256,12 @@ pub fn generate_track (size: &Dim) -> Track {
         }
 
         // downloading track data
-        if !path::Path::new("track_data/").exists() {
+        if !Path::new("track_data/").exists() {
             fs::create_dir("track_data/").unwrap();
         }
         save_buffer("track_data/map.png", &map, map.width(), map.height(), image::ColorType::L8).expect("Failed to download track map");
         save_buffer("track_data/img.png", &img, img.width(), img.height(), image::ColorType::Rgb8).expect("Failed to download track map");
+        let img = Texture::from_path(Path::new("track_data/img.png"), &TextureSettings::new()).unwrap();
 
         let start_pos = points[0].pos.clone();
         let start_orientation = (points[0].tan.y / points[0].tan.x).atan();
