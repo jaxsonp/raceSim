@@ -9,12 +9,11 @@ use graphics::{rectangle::Rectangle, Image};
 use piston::input::RenderArgs;
 use rand::{thread_rng, Rng}; // provides rng
 
-use crate::{colors::*, Pos, Dim, RenderContext};
+use crate::{render::*, Pos, Dim};
 
 pub struct Track {
     points: Vec<BezierPoint>,
-    pub map: ImageBuffer<Luma<u8>, Vec<u8>>,
-    pub img: Texture,
+    map: ImageBuffer<Luma<u8>, Vec<u8>>,
     pub start_pos: Pos,
     pub start_orientation: f32,
     render_matrix_decomp: SVD<f32, Const<4>, Const<4>>,
@@ -22,7 +21,7 @@ pub struct Track {
 
 impl Track {
 
-    pub fn render(&self, gl: &mut GlGraphics, render_args: &RenderArgs, render_context: &RenderContext) {
+    /*pub fn render(&self, gl: &mut GlGraphics, render_args: &RenderArgs, render_context: &RenderContext) {
         // drawing road
         /*let image  = Image::new().rect(Rectangle(0.0, 0.0, 200.0));
         gl.draw(render_args.viewport(), |c, gl| {
@@ -88,7 +87,7 @@ impl Track {
                 graphics::line(BLACK, 1.0, point, transform, gl)
             });
         }*/
-    }
+    }*/
 }
 
 pub fn generate_track (size: &Dim) -> Track {
@@ -268,7 +267,6 @@ pub fn generate_track (size: &Dim) -> Track {
         Track {
             points,
             map,
-            img,
             start_pos,
             start_orientation,
             render_matrix_decomp,

@@ -1,50 +1,9 @@
 mod race;
-mod colors;
+mod render;
 
 use graphics::Transformed;
-use piston::{RenderArgs, UpdateArgs};
 use std::fmt;
-use opengl_graphics::GlGraphics;
 
-use race::{Race, Track, generate_track};
-use colors::*;
-
-pub struct Simulation {
-    gl: GlGraphics, // OpenGL drawing backend.
-    race: Race,
-    size: Dim,
-    track: Track,
-}
-
-impl Simulation {
-    pub fn new(gl: GlGraphics, n_cars: u32, size: &Dim) -> Self {
-        println!("Initializing simulation");
-        let size = size.clone();
-
-        let track = generate_track(&size);
-
-        let race = Race::new(n_cars, &size, track.start_pos, track.start_orientation);
-        Simulation { gl, race, size, track, }
-    }
-
-    // TEMP FUNCTION, TODO delete
-    pub fn regenerate_track(&mut self) -> () {
-        self.track = generate_track(&self.size);
-    }
-
-    pub fn render(&mut self, render_args: &RenderArgs, render_context: &RenderContext) {
-        // drawing grass
-        self.gl.draw(render_args.viewport(), |c, gl| {
-            graphics::clear(GREEN, gl);
-        });
-        self.track.render(&mut self.gl, render_args, render_context);
-        self.race.render(&mut self.gl, render_args, render_context);
-    }
-
-    pub fn update(&mut self, args: &UpdateArgs) {
-        self.race.update(&mut self.gl, &args)
-    }
-}
 
 /*
  * struct to pass rendering info into render functions
