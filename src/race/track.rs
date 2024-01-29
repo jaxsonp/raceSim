@@ -6,23 +6,26 @@ use image::{ImageBuffer, Rgb, save_buffer, Luma};
 use nalgebra::{Matrix4, Vector4, SVD, Const};
 use opengl_graphics::{GlGraphics, Texture, TextureSettings};
 use graphics::{rectangle::Rectangle, Image};
-use piston::input::RenderArgs;
 use rand::{thread_rng, Rng}; // provides rng
 
-use crate::{colors::*, Pos, Dim, RenderContext};
+use crate::{render::{
+        GRAY,
+        GREEN,
+        as_rgb
+    },
+    Pos,
+    Dim
+};
 
 pub struct Track {
-    points: Vec<BezierPoint>,
-    pub map: ImageBuffer<Luma<u8>, Vec<u8>>,
-    pub img: Texture,
+    map: ImageBuffer<Luma<u8>, Vec<u8>>,
     pub start_pos: Pos,
     pub start_orientation: f32,
-    render_matrix_decomp: SVD<f32, Const<4>, Const<4>>,
 }
 
 impl Track {
 
-    pub fn render(&self, gl: &mut GlGraphics, render_args: &RenderArgs, render_context: &RenderContext) {
+    /*pub fn render(&self, gl: &mut GlGraphics, render_args: &RenderArgs, render_context: &RenderContext) {
         // drawing road
         /*let image  = Image::new().rect(Rectangle(0.0, 0.0, 200.0));
         gl.draw(render_args.viewport(), |c, gl| {
@@ -88,14 +91,14 @@ impl Track {
                 graphics::line(BLACK, 1.0, point, transform, gl)
             });
         }*/
-    }
+    }*/
 }
 
 pub fn generate_track (size: &Dim) -> Track {
-    println!("Generating track");
+    print!("\rGenerating track... ");
 
     // TODO remove generating track output
-    const PRINT_DEBUG: bool = true;
+    const PRINT_DEBUG: bool = false;
     const ROAD_WIDTH: f32 = 40.0;
     const N_POINTS_RANGE: core::ops::Range<u32> = 20..30;
     const POS_NOISE_REL_DELTA: f32 = 0.15;
@@ -173,7 +176,9 @@ pub fn generate_track (size: &Dim) -> Track {
         let this = points[(i + 1) % points.len()].pos.sub(points[i].pos).normalize();
         let next = points[(i + 2) % points.len()].pos.sub(points[(i + 1) % points.len()].pos).normalize();
         let delta_theta = this.dot(next).acos();
-        println!("{delta_theta}");
+        if PRINT_DEBUG {
+            println!("{delta_theta}");
+        }
         if delta_theta <= POINT_MIN_MERGE_ANGLE || delta_theta >= PI - POINT_MIN_MERGE_ANGLE {
             // popping
             if PRINT_DEBUG {
@@ -265,13 +270,11 @@ pub fn generate_track (size: &Dim) -> Track {
 
         let start_pos = points[0].pos.clone();
         let start_orientation = (points[0].tan.y / points[0].tan.x).atan();
+        println!("done");
         Track {
-            points,
             map,
-            img,
             start_pos,
             start_orientation,
-            render_matrix_decomp,
         }
     }
 }
