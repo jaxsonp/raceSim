@@ -1,6 +1,4 @@
-#![allow(dead_code)]
-#![allow(unused_variables)]
-#![allow(unused_imports)]
+
 
 extern crate glutin_window;
 extern crate graphics;
@@ -23,7 +21,7 @@ use race::{Race, Track, generate_track};
 
 use racetrack_simulator::{Pos, Dim};
 
-const N_CARS: u32 = 100;
+const N_CARS: u32 = 1;
 
 const WIDTH: f32 = 800.0;
 const HEIGHT: f32 = 800.0;
@@ -44,8 +42,13 @@ impl Simulation {
 
         let track = generate_track(&size);
         let track_img = Texture::from_path(Path::new("track_data/img.png"), &TextureSettings::new()).expect("Failed to load map data");
-        let race = Race::new(n_cars, &size, track.start_pos, track.start_orientation);
-        Simulation { race, size, track, track_img, }
+        let race = Race::new(n_cars, track.start_pos, track.start_orientation);
+        Simulation {
+            race,
+            size,
+            track,
+            track_img,
+        }
     }
 
     // TEMP FUNCTION, TODO delete
@@ -56,6 +59,7 @@ impl Simulation {
     pub fn render(&mut self, renderer: &mut Renderer) {
 
         renderer.draw_track(&self.track_img);
+        renderer.draw_cars(&self.race)
     }
 
     pub fn update(&mut self, args: &UpdateArgs) {
@@ -128,6 +132,7 @@ fn main() {
                 } else {
                     1.0 - SCROLL_SPEED
                 };
+                println!("scroll");
                 renderer.zoom_view(scroll, mouse_pos);
             }
 

@@ -1,30 +1,7 @@
 mod race;
 mod render;
 
-use graphics::Transformed;
 use std::fmt;
-
-
-/*
- * struct to pass rendering info into render functions
-*/
-pub struct RenderContext {
-    pub pos: Pos,
-    pub scale: f32,
-}
-
-impl RenderContext {
-    pub fn new () -> Self {
-        Self {
-            pos: Pos::zero(),
-            scale: 1.0,
-        }
-    }
-
-    pub fn apply_transformation (&self, transform: [[f64; 3]; 2]) -> [[f64; 3]; 2] {
-        transform.trans(self.pos.x as f64, self.pos.y as f64).scale(self.scale as f64, self.scale as f64)
-    }
-}
 
 /*
  * Data struct to elegantly store position data

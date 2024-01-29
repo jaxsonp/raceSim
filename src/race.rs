@@ -9,22 +9,21 @@ use car::Car;
 pub use track::Track;
 
 pub struct Race {
-    t: u64,
-    n_cars: u32,
-    cars: Vec<Car>,
-    size: Dim,
+    pub t: u64,
+    pub n_cars: u32,
+    pub cars: Vec<Car>,
 }
 
 impl Race {
 
-    pub fn new (n_cars: u32, size: &Dim, start_pos: Pos, start_orientation: f32) -> Race {
-        println!("Generating new race");
+    pub fn new (n_cars: u32, start_pos: Pos, start_orientation: f32) -> Race {
+        println!("Initializing new race");
         let mut cars = Vec::new();
         for i in 0..n_cars {
             cars.push(Car::new(i, start_pos, start_orientation));
         }
 
-        let new_race = Race { t: 0, n_cars, cars, size: size.clone() };
+        let new_race = Race { t: 0, n_cars, cars, };
 
 
         new_race

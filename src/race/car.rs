@@ -1,13 +1,13 @@
 
-use piston::input::{UpdateArgs};
+use piston::input::UpdateArgs;
 
 use crate::Pos;
 
 pub struct Car {
     pub id: u32,
     t: u64,
-    pos: Pos,
-    orientation: f32,
+    pub pos: Pos,
+    pub orientation: f32,
 }
 
 impl Car {
