@@ -68,7 +68,7 @@ impl Simulation {
 }
 
 fn main() {
-    println!("Starting");
+    println!("Starting initializing");
 
     // creating window
     let opengl = OpenGL::V3_2;
@@ -90,6 +90,7 @@ fn main() {
     // initializing a renderer
     let mut renderer = Renderer::new(gl);
 
+    println!("Starting simulation");
     let mut event_settings = EventSettings::new();
     event_settings.max_fps = MAX_FPS as u64;
     let mut events = Events::new(event_settings);

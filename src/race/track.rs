@@ -23,77 +23,6 @@ pub struct Track {
     pub start_orientation: f32,
 }
 
-impl Track {
-
-    /*pub fn render(&self, gl: &mut GlGraphics, render_args: &RenderArgs, render_context: &RenderContext) {
-        // drawing road
-        /*let image  = Image::new().rect(Rectangle(0.0, 0.0, 200.0));
-        gl.draw(render_args.viewport(), |c, gl| {
-            //Clear the screen
-            graphics::clear([0.0, 0.0, 0.0, 1.0], gl);
-            //Draw the image with the texture
-            image.draw(&self.img, default_draw_state(), c.transform, gl);
-        });*/
-        for i in 0.. self.points.len() {
-            // catmull-rom spline drawing
-            let p1 = &self.points[i];
-            let p2 = &self.points[(i + 1) % self.points.len()];
-            let x = 200.0;
-            let x_vec = Vector4::new(
-                p1.pos.x, p2.pos.x, p1.tan.x * x, p2.tan.x * x,
-            );
-            let x_eq = self.render_matrix_decomp.solve(&x_vec, 0.0).expect("failed to solve matrix (x)");
-            let y_vec = Vector4::new(
-                p1.pos.y, p2.pos.y, p1.tan.y * x, p2.tan.y * x,
-            );
-            let y_eq = self.render_matrix_decomp.solve(&y_vec, 0.0).expect("failed to solve matrix (y)");
-            let mut t: f32 = 0.01;
-            while t < 1.0 {
-                let p = Pos::new(
-                    x_eq[0] * t.powf(3.0) + x_eq[1] * t.powf(2.0) + x_eq[2] * t + x_eq[3],
-                    y_eq[0] * t.powf(3.0) + y_eq[1] * t.powf(2.0) + y_eq[2] * t + y_eq[3],
-                );
-                gl.draw(render_args.viewport(), |c,gl| {
-                    let point: graphics::types::Rectangle = [(p.x - 20.0) as f64, (p.y - 20.0) as f64, 40.0, 40.0];
-                    let transform = render_context.apply_transformation(c.transform);
-
-                    graphics::ellipse(GRAY, point, transform, gl)
-                });
-                t += 0.01
-            }
-        }
-        // TODO delete debug drawing
-        /*for i in 0..self.points.len() {
-            let p = &self.points[i];
-
-            // drawing points
-            gl.draw(render_args.viewport(), |c,gl| {
-                let point: graphics::types::Rectangle = [(p.pos.x - 5.0) as f64, (p.pos.y - 5.0) as f64, 10.0, 10.0];
-                let transform = render_context.apply_transformation(c.transform);
-
-                graphics::ellipse(BLACK, point, transform, gl)
-            });
-
-            //drawing connecting lines
-            let next = &self.points[(i + 1) % self.points.len()];
-            gl.draw(render_args.viewport(), |c,gl| {
-                let point: graphics::types::Line = [p.pos.x as f64, p.pos.y as f64, next.pos.x as f64, next.pos.y as f64];
-                let transform = render_context.apply_transformation(c.transform);
-
-                graphics::line(RED, 0.5, point, transform, gl)
-            });
-
-            // drawing tangents
-            gl.draw(render_args.viewport(), |c,gl| {
-                let point: graphics::types::Rectangle = [p.pos.x as f64, p.pos.y as f64, (p.pos.x + p.tan.mul(25.0).x) as f64, (p.pos.y + p.tan.mul(25.0).y) as f64];
-                let transform = render_context.apply_transformation(c.transform);
-
-                graphics::line(BLACK, 1.0, point, transform, gl)
-            });
-        }*/
-    }*/
-}
-
 pub fn generate_track (size: &Dim) -> Track {
     print!("\rGenerating track... ");
 
@@ -143,19 +72,28 @@ pub fn generate_track (size: &Dim) -> Track {
         }
     }
 
-    // merging points that are too close
+    // merging points that are too close to each other or border
     let mut i = 0;
     let mut j = 1;
     while i < points.len() {
+        // checking if points are too close to border
+        if points[i].pos.x < ROAD_WIDTH || points[i].pos.x > size.w - ROAD_WIDTH || points[i].pos.y < ROAD_WIDTH || points[i].pos.y > size.h - ROAD_WIDTH {
+            if PRINT_DEBUG {
+                println!("Removing point {}, too close to border", i)
+            }
+            points.remove(i); // popping
+            i = 0;
+            j = 1;
+            continue;
+        }
 
         // calculating distance
         let dist = points[j].pos.sub(points[i].pos).len();
         if dist <= POINT_MIN_MERGE_DIST {
-            // popping
             if PRINT_DEBUG {
                 println!("Removing point {}, collided with {} (dist: {:.2})", i, j, dist)
             }
-            points.remove(i);
+            points.remove(i); // popping
             i = 0;
             j = 1;
             continue;
