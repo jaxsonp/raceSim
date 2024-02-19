@@ -8,24 +8,23 @@ extern crate piston;
 use std::path::Path;
 use glutin_window::GlutinWindow;
 use opengl_graphics::{GlGraphics, OpenGL, Texture, TextureSettings};
-use piston::{ButtonEvent, CloseEvent, FocusEvent, MouseCursorEvent, MouseRelativeEvent, MouseScrollEvent, UpdateArgs};
+use piston::{ButtonEvent, CloseEvent, EventLoop, FocusEvent, MouseCursorEvent, MouseRelativeEvent, MouseScrollEvent, UpdateArgs, Window};
 use piston::event_loop::{EventSettings, Events};
 use piston::input::{RenderEvent, UpdateEvent, Button, ButtonState, MouseButton};
 use piston::window::WindowSettings;
 
 mod render;
 use render::Renderer;
-
 mod race;
 use race::{Race, Track, generate_track};
-
 use racetrack_simulator::{Pos, Dim};
 
 const N_CARS: u32 = 1;
 
 const WIDTH: f32 = 800.0;
 const HEIGHT: f32 = 800.0;
-const MAX_FPS: u32 = 60;
+const FPS: u64 = 30;
+const TICK_SPEED: u64 = 60;
 const SCROLL_SPEED: f32 = 0.07;
 
 pub struct Simulation {
@@ -39,7 +38,6 @@ impl Simulation {
     pub fn new(n_cars: u32, size: &Dim) -> Self {
         println!("Initializing simulation");
         let size = size.clone();
-
         let track = generate_track(&size);
         let track_img = Texture::from_path(Path::new("track_data/img.png"), &TextureSettings::new()).expect("Failed to load map data");
         let race = Race::new(n_cars, track.start_pos, track.start_orientation);
@@ -83,16 +81,19 @@ fn main() {
     let mut window_focused = true;
     let mut left_mouse_pressed = false;
 
+
     // creating the simulation
     let gl: GlGraphics = GlGraphics::new(opengl);
     let mut sim = Simulation::new(N_CARS, &size);
+    println!("start pos: {}", sim.track.start_pos);
 
     // initializing a renderer
     let mut renderer = Renderer::new(gl);
 
     println!("Starting simulation");
-    let mut event_settings = EventSettings::new();
-    event_settings.max_fps = MAX_FPS as u64;
+    let event_settings = EventSettings::new()
+        .max_fps(FPS)
+        .ups(TICK_SPEED);
     let mut events = Events::new(event_settings);
     // event loop
     while let Some(e) = events.next(&mut window) {
@@ -142,11 +143,6 @@ fn main() {
             if args.button == Button::Mouse(MouseButton::Left) {
                 // left mouse button event
                 left_mouse_pressed = args.state == ButtonState::Press;
-
-                // DEBUG: regenerate track on click
-                /*if left_mouse_pressed {
-                    sim.regenerate_track();
-                }*/
             }
         }
     }

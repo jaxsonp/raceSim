@@ -1,6 +1,3 @@
-mod race;
-mod render;
-
 use std::fmt;
 
 /*

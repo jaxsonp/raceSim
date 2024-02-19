@@ -3,30 +3,28 @@ extern crate image;
 use std::{fs, path::Path};
 use std::f32::consts::PI;
 use image::{ImageBuffer, Rgb, save_buffer, Luma};
-use nalgebra::{Matrix4, Vector4, SVD, Const};
-use opengl_graphics::{GlGraphics, Texture, TextureSettings};
-use graphics::{rectangle::Rectangle, Image};
+use nalgebra::{Matrix4, Vector4};
 use rand::{thread_rng, Rng}; // provides rng
 
-use crate::{render::{
+use crate::{
+    render::{
         GRAY,
         GREEN,
         as_rgb
     },
+    Dim,
     Pos,
-    Dim
 };
 
 pub struct Track {
     map: ImageBuffer<Luma<u8>, Vec<u8>>,
     pub start_pos: Pos,
-    pub start_orientation: f32,
+    pub start_orientation: f64,
 }
 
 pub fn generate_track (size: &Dim) -> Track {
     print!("\rGenerating track... ");
 
-    // TODO remove generating track output
     const PRINT_DEBUG: bool = false;
     const ROAD_WIDTH: f32 = 40.0;
     const N_POINTS_RANGE: core::ops::Range<u32> = 20..30;
@@ -195,6 +193,8 @@ pub fn generate_track (size: &Dim) -> Track {
                         img.put_pixel(pix_x as u32, pix_y as u32, Rgb(as_rgb(GRAY)));
                     }
                 }
+                // putting pixel at start pos
+                img.put_pixel(points[0].pos.x as u32, points[0].pos.y as u32, Rgb(as_rgb(GRAY)));
             }
         }
 
@@ -204,10 +204,9 @@ pub fn generate_track (size: &Dim) -> Track {
         }
         save_buffer("track_data/map.png", &map, map.width(), map.height(), image::ColorType::L8).expect("Failed to download track map");
         save_buffer("track_data/img.png", &img, img.width(), img.height(), image::ColorType::Rgb8).expect("Failed to download track map");
-        let img = Texture::from_path(Path::new("track_data/img.png"), &TextureSettings::new()).unwrap();
 
         let start_pos = points[0].pos.clone();
-        let start_orientation = (points[0].tan.y / points[0].tan.x).atan();
+        let start_orientation = (-points[0].tan.y / points[0].tan.x).atan() as f64;
         println!("done");
         Track {
             map,

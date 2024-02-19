@@ -1,10 +1,11 @@
 
-
+use std::f64::consts::FRAC_PI_2;
 use opengl_graphics::{GlGraphics, Texture};
 use graphics::{
     rectangle::{
         Border, Rectangle, Shape
-    }, DrawState, Image, ImageSize, Transformed};
+    }, 
+    line::Line, ellipse::Ellipse, DrawState, Image, ImageSize, Transformed};
 use piston::RenderArgs;
 
 use crate::{race::Race, Pos};
@@ -64,7 +65,7 @@ impl Renderer {
         // drawing the background
         self.gl.draw(viewport, |c, gl| {
             Rectangle {
-                color: GREEN,
+                color: BLACK,
                 shape: Shape::Square,
                 border: None,
             }.draw([0.0, 0.0, viewport.draw_size[0] as f64, viewport.draw_size[1] as f64], &self.draw_state, c.transform, gl)
@@ -85,7 +86,7 @@ impl Renderer {
         }
     }
 
-    pub fn draw_car(&mut self, pos: Pos, orientation: f32) -> () {
+    pub fn draw_car(&mut self, pos: Pos, orientation: f64) -> () {
         if !self.render_args.is_some() {
             return;
         }
@@ -93,7 +94,7 @@ impl Renderer {
             let transform = c.transform
                 .trans(self.pos.x as f64, self.pos.y as f64).scale(self.scale as f64, self.scale as f64) // applying render context transform
                 .trans(pos.x as f64, pos.y as f64)
-                .rot_rad(orientation as f64);
+                .rot_rad(-orientation + FRAC_PI_2);
             Rectangle {
                 color: RED,
                 shape: Shape::Round(CAR_WIDTH / 6.0, 3),
@@ -107,6 +108,21 @@ impl Renderer {
                     CAR_WIDTH,
                     CAR_LENGTH
                 ],
+                &self.draw_state, transform, gl)
+        });
+        self.gl.draw(self.render_args.unwrap().viewport(), |c, gl| {
+            let transform = c.transform
+                .trans(self.pos.x as f64, self.pos.y as f64).scale(self.scale as f64, self.scale as f64) // applying render context transform
+                .trans(pos.x as f64, pos.y as f64)
+                .rot_rad(-orientation + FRAC_PI_2);
+            Line::new(BLACK, 2.0).draw([0.0, 0.0, 0.0, -CAR_LENGTH],
+                &self.draw_state, transform, gl)
+        });
+        self.gl.draw(self.render_args.unwrap().viewport(), |c, gl| {
+            let transform = c.transform
+                .trans(self.pos.x as f64, self.pos.y as f64).scale(self.scale as f64, self.scale as f64) // applying render context transform
+                .trans(pos.x as f64, pos.y as f64);
+            Ellipse::new(BLACK).draw([-10.0, -10.0, 10.0, 10.0],
                 &self.draw_state, transform, gl)
         });
     }

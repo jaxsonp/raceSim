@@ -1,10 +1,9 @@
 mod car;
 mod track;
 
-use opengl_graphics::GlGraphics;
 use piston::input::UpdateArgs;
 
-use crate::{Pos, Dim};
+use crate::Pos;
 use car::Car;
 pub use track::Track;
 
@@ -16,27 +15,25 @@ pub struct Race {
 
 impl Race {
 
-    pub fn new (n_cars: u32, start_pos: Pos, start_orientation: f32) -> Race {
-        println!("Initializing new race");
+    pub fn new (n_cars: u32, start_pos: Pos, start_orientation: f64) -> Race {
+        println!("Initializing new race (start orientation: {start_orientation})");
         let mut cars = Vec::new();
         for i in 0..n_cars {
             cars.push(Car::new(i, start_pos, start_orientation));
         }
-
-        let new_race = Race { t: 0, n_cars, cars, };
-
-
-        new_race
+        Race {
+            t: 0,
+            n_cars,
+            cars,
+        }
     }
 
     pub fn update(&mut self, update_args: &UpdateArgs) {
+        let delta_time = update_args.dt as f32;
         for car in self.cars.iter_mut() {
-            car.update(update_args);
+            car.update(delta_time);
         }
         self.t += 1;
-        if self.t % 60 == 0 {
-            //println!("t: {}", self.t);
-        }
     }
 
 }
