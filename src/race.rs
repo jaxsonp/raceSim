@@ -1,8 +1,6 @@
 mod car;
 mod track;
 
-use piston::input::UpdateArgs;
-
 use crate::Pos;
 use car::Car;
 pub use track::Track;
@@ -28,8 +26,8 @@ impl Race {
         }
     }
 
-    pub fn update(&mut self, update_args: &UpdateArgs) {
-        let delta_time = update_args.dt as f32;
+    pub fn update(&mut self) {
+        let delta_time = 1.0;//update_args.dt as f32;
         for car in self.cars.iter_mut() {
             car.update(delta_time);
         }

@@ -1,6 +1,6 @@
 
 
-extern crate glutin_window;
+/*extern crate glutin_window;
 extern crate graphics;
 extern crate opengl_graphics;
 extern crate piston;
@@ -11,7 +11,9 @@ use opengl_graphics::{GlGraphics, OpenGL, Texture, TextureSettings};
 use piston::{ButtonEvent, CloseEvent, EventLoop, FocusEvent, MouseCursorEvent, MouseRelativeEvent, MouseScrollEvent, UpdateArgs, Window};
 use piston::event_loop::{EventSettings, Events};
 use piston::input::{RenderEvent, UpdateEvent, Button, ButtonState, MouseButton};
-use piston::window::WindowSettings;
+use piston::window::WindowSettings;*/
+
+use blue_engine::header::{Engine, WindowDescriptor};
 
 mod render;
 use render::Renderer;
@@ -31,7 +33,7 @@ pub struct Simulation {
     race: Race,
     size: Dim,
     track: Track,
-    track_img: Texture,
+    //track_img: Texture,
 }
 
 impl Simulation {
@@ -39,13 +41,13 @@ impl Simulation {
         println!("Initializing simulation");
         let size = size.clone();
         let track = generate_track(&size);
-        let track_img = Texture::from_path(Path::new("track_data/img.png"), &TextureSettings::new()).expect("Failed to load map data");
+        //let track_img = Texture::from_path(Path::new("track_data/img.png"), &TextureSettings::new()).expect("Failed to load map data");
         let race = Race::new(n_cars, track.start_pos, track.start_orientation);
         Simulation {
             race,
             size,
             track,
-            track_img,
+            //track_img,
         }
     }
 
@@ -56,19 +58,25 @@ impl Simulation {
 
     pub fn render(&mut self, renderer: &mut Renderer) {
 
-        renderer.draw_track(&self.track_img);
+        //renderer.draw_track(&self.track_img);
         renderer.draw_cars(&self.race)
     }
 
-    pub fn update(&mut self, args: &UpdateArgs) {
-        self.race.update(&args);
+    pub fn update(&mut self) {
+        self.race.update();
     }
 }
 
 fn main() {
     println!("Starting initializing");
 
-    // creating window
+
+    let engine = Engine::new().expect("Failed to create rendering engine");
+
+    engine.update_loop(move |_, _, _, _, _, _| {})
+        .expect("Error during update loop");
+
+    /*// creating window
     let opengl = OpenGL::V3_2;
     let size = Dim::new(WIDTH, HEIGHT);
     let mut window: GlutinWindow = WindowSettings::new("Racetrack Simulator", [size.w as f64, size.h as f64])
@@ -145,5 +153,5 @@ fn main() {
                 left_mouse_pressed = args.state == ButtonState::Press;
             }
         }
-    }
+    }*/
 }

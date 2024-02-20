@@ -1,12 +1,12 @@
 
 use std::f64::consts::FRAC_PI_2;
-use opengl_graphics::{GlGraphics, Texture};
+/*use opengl_graphics::{GlGraphics, Texture};
 use graphics::{
     rectangle::{
         Border, Rectangle, Shape
     }, 
     line::Line, ellipse::Ellipse, DrawState, Image, ImageSize, Transformed};
-use piston::RenderArgs;
+use piston::RenderArgs;*/
 
 use crate::{race::Race, Pos};
 
@@ -33,36 +33,21 @@ pub fn as_rgb(c: [f32; 4]) -> [u8; 3] {
 }
 
 pub struct Renderer {
-    gl: GlGraphics,
     pos: Pos,
     scale: f32,
-    render_args: Option<RenderArgs>,
-    draw_state: DrawState,
 }
 
 impl Renderer {
-    pub fn new(gl: GlGraphics) -> Self {
-        let draw_state = DrawState {
-            scissor: None,
-            stencil: None,
-            blend: None,
-        };
+    pub fn new() -> Self {
         Self {
-            gl,
             pos: Pos::zero(),
             scale: 1.0,
-            render_args: None,
-            draw_state,
         }
     }
 
-    pub fn draw_track(&mut self, img: &Texture) -> () {
-        if !self.render_args.is_some() {
-            return;
-        }
-        let viewport = self.render_args.unwrap().viewport();
+    pub fn draw_track(&mut self) -> () {
 
-        // drawing the background
+        /*// drawing the background
         self.gl.draw(viewport, |c, gl| {
             Rectangle {
                 color: BLACK,
@@ -77,7 +62,7 @@ impl Renderer {
 
             Image::new().rect([ 0.0, 0.0, img.get_size().0 as f64, img.get_size().1 as f64 ])
                 .draw(img, &self.draw_state, transform, gl)
-        });
+        });;*/
     }
 
     pub fn draw_cars(&mut self, race: &Race) {
@@ -87,7 +72,7 @@ impl Renderer {
     }
 
     pub fn draw_car(&mut self, pos: Pos, orientation: f64) -> () {
-        if !self.render_args.is_some() {
+        /*if !self.render_args.is_some() {
             return;
         }
         self.gl.draw(self.render_args.unwrap().viewport(), |c, gl| {
@@ -124,7 +109,7 @@ impl Renderer {
                 .trans(pos.x as f64, pos.y as f64);
             Ellipse::new(BLACK).draw([-10.0, -10.0, 10.0, 10.0],
                 &self.draw_state, transform, gl)
-        });
+        });*/
     }
 
     pub fn pan_view(&mut self, x_off: f64, y_off: f64) -> () {
@@ -138,7 +123,7 @@ impl Renderer {
         self.scale *= zoom_amt;
     }
 
-    pub fn set_render_args(&mut self, new_args: RenderArgs) -> () {
+    /*pub fn set_render_args(&mut self, new_args: RenderArgs) -> () {
         self.render_args = Some(new_args);
-    }
+    }*/
 }
